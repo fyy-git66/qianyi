@@ -1,0 +1,144 @@
+#图像读取与显示
+#彩色图像显示
+import cv2
+import matplotlib.pyplot as plt
+
+#以BGR格式读取图像（opencv默认方式）
+img_bgr = cv2.imread('epiao.png')
+#将BGR格式转换为RGB
+img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+
+#使用matplotlib函数显示图像
+plt.imshow(img_rgb)
+plt.axis('off')#隐藏坐标轴
+plt.show()
+
+
+#灰度图显示
+import cv2
+import matplotlib.pyplot as plt
+
+img_gray = cv2.imread('epiao.png', cv2.IMREAD_GRAYSCALE)
+
+#显示灰度图需指定colormap
+plt.imshow(img_gray, cmap='gray')
+plt.title('gray')#在图片上方显示标题
+plt.axis('off')
+plt.show()
+
+
+#多图对比显示
+#Canny边缘检测的简单应用，我还特地查了下，公式真多，看不懂
+#主要学习里面几个函数
+import cv2
+import matplotlib.pyplot as plt
+
+img_gray = cv2.imread('epiao.png', cv2.IMREAD_GRAYSCALE)
+
+#Canny边缘检测
+edges = cv2.Canny(img_gray, 100, 200)
+
+#创建子图
+plt.figure(figsize=(10 , 5))
+'''
+    参数格式：figsize=(width, height)
+    创建或激活现有画布，并设置其物理尺寸
+'''
+
+#显示原图
+plt.subplot(1, 2, 1)
+'''
+    函数参数格式为 plt.subplot(nrows, ncols, index)
+    (行->列->索引)，将画布划分多个区域并激活其中部分进行后续绘图
+'''
+
+plt.imshow(img_gray, cmap = 'gray')
+plt.title('original')
+plt.axis('off')
+#
+#显示边缘检测结果
+plt.subplot(1, 2, 2)
+plt.imshow(edges, cmap = 'gray')
+plt.title('change')
+plt.axis('off')
+
+plt.tight_layout()#优化图表布局————自动调节子图数据，使所有元素都能出现
+plt.show()
+
+
+
+#绘制直方图
+import cv2
+import matplotlib.pyplot as plt
+
+img_gray = cv2.imread('epiao.png', cv2.IMREAD_GRAYSCALE)
+
+hist = cv2.calcHist([img_gray], [0], None, [256], [0, 256])
+'''
+    参数 [img_gray] 输入图像，[0] 选择通道，None 无掩膜，[256] 设置精细区间，[0, 256] 覆盖全范围。
+    函数用于图像增强
+'''
+
+plt.figure()
+plt.plot(hist, color = 'black')#将直方图以黑色直线的形式绘制
+plt.xlim([0,256])
+plt.xlabel('Pixels(像素)')
+plt.ylabel('Frequence(频率)')
+plt.title('Grayscale(灰度图)Histogram(直方图)')
+plt.show()
+
+
+# #绘制轮廓形状
+import cv2
+import matplotlib.pyplot as plt
+
+img_gray = cv2.imread('epiao.png', cv2.IMREAD_GRAYSCALE)
+edges = cv2.Canny(img_gray, 100, 200)
+
+#从二值图像检测轮廓的核心函数
+contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+#输入图像必须是灰度图，直接输入彩色图像会报错
+'''
+    cv2.findContours(image, mode, method)
+    参数：image:必须是黑白的二值图，需要用到canny等进行处理   mode:轮廓检测的模式cv2.RETR.TREE为检测
+    所有轮廓并建立层级树关系   method:轮廓近似方法，决定如何储存点的坐标，cv2.CHAIN_APPROX_SIMPLE为
+    压缩冗余点（只保留端点）
+'''
+
+img_bgr = cv2.imread('epiao.png')
+
+#在图像上绘制轮廓
+img_contours = cv2.drawContours(img_bgr.copy(), contours, -1, (255, 0, 0), 2)
+#drawContours()函数只支持bgr格式的多通道图像,所以在进行图像处理时要处理完成后转换颜色格式
+#另：opencv会修改原图
+'''
+    cv2.drawContours(image, contours, contourIdx, color, thickness)
+    参数：img_bgr.copy()复制副本，避免函数直接修改原图  contours，使用预先检测到的列表进行轮廓绘制
+         contourIdx，填充轮廓内部（实心绘制）  color，边缘颜色选择，如(0, 0, 255)就是用红色线条进行轮廓绘制
+         thickness，轮廓线条宽度，2为2像素
+'''
+img_rgb = cv2.cvtColor(img_contours, cv2.COLOR_BGR2RGB)
+# plt.savefig('TREE SIMPLE.png', bbox_inches = 'tight', pad_inches = 0 , dpi = 300)
+##用matplotlib保存后一片空白，不知道是不是哪个参数调错了
+
+plt.imshow(img_rgb)
+plt.axis('off')
+plt.title('TREE SIMPLE')
+plt.show()
+
+
+
+#显示大尺寸图像，Matplotlib默认显示尺寸较小，大可能模糊
+#解决方法：调整画布尺寸和插值方式
+import cv2
+import matplotlib.pyplot as plt
+
+img_bgr = cv2.imread('epiao.png')
+img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+
+plt.figure(figsize=(20,10))
+plt.imshow(img_rgb, interpolation='bilinear')
+plt.axis('off')
+plt.show()
+
+cv2.imwrite('high.png', img_rgb)
